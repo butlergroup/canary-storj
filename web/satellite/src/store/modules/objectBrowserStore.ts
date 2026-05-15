@@ -2,38 +2,38 @@
 // See LICENSE for copying information.
 
 import { md5 } from 'js-md5';
-import { computed, reactive, UnwrapNestedRefs, h, VNode } from 'vue';
+import { type UnwrapNestedRefs, type VNode, computed, reactive, h  } from 'vue';
 import { defineStore } from 'pinia';
 import {
-    _Object,
-    CommonPrefix,
+    type _Object,
+    type CommonPrefix,
+    type ListObjectsV2CommandInput,
+    type ListObjectsV2CommandOutput,
+    type ListObjectVersionsCommandInput,
+    type ListObjectVersionsCommandOutput,
+    type S3ClientConfig,
+    type GetObjectRetentionCommandOutput,
+    type ObjectVersion,
+    type DeleteMarkerEntry,
+    type ObjectLockMode,
+    type ServiceInputTypes,
+    type ServiceOutputTypes,
     CopyObjectCommand,
     DeleteObjectCommand,
     GetObjectCommand,
     ListObjectsCommand,
     ListObjectsV2Command,
-    ListObjectsV2CommandInput,
-    ListObjectsV2CommandOutput,
     ListObjectVersionsCommand,
-    ListObjectVersionsCommandInput,
-    ListObjectVersionsCommandOutput,
     PutObjectCommand,
     PutObjectRetentionCommand,
     S3Client,
-    S3ClientConfig,
     GetObjectRetentionCommand,
-    GetObjectRetentionCommandOutput,
-    ObjectVersion,
-    DeleteMarkerEntry,
     DeleteObjectsCommand,
-    ObjectLockMode,
     PutObjectLegalHoldCommand,
     GetObjectLegalHoldCommand,
     ObjectLockLegalHoldStatus,
-    ServiceInputTypes,
-    ServiceOutputTypes,
 } from '@aws-sdk/client-s3';
-import {
+import type {
     BuildHandler,
     BuildHandlerArguments,
     BuildHandlerOutput,
@@ -41,7 +41,7 @@ import {
 } from '@aws-sdk/types';
 import { HttpRequest } from '@smithy/protocol-http';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Progress, Upload } from '@aws-sdk/lib-storage';
+import { type Progress, Upload  } from '@aws-sdk/lib-storage';
 import { SignatureV4 } from '@smithy/signature-v4';
 
 import { AnalyticsErrorEventSource } from '@/utils/constants/analyticsEventNames';
@@ -50,7 +50,7 @@ import { useNotificationsStore } from '@/store/modules/notificationsStore';
 import { DEFAULT_PAGE_LIMIT } from '@/types/pagination';
 import { ObjectDeleteError } from '@/utils/error';
 import { useConfigStore } from '@/store/modules/configStore';
-import { ObjectLockStatus, Retention } from '@/types/objectLock';
+import { type ObjectLockStatus, Retention  } from '@/types/objectLock';
 
 export type BrowserObject = {
     Key: string;
@@ -192,9 +192,9 @@ export const useObjectBrowserStore = defineStore('objectBrowser', () => {
         return state.uploading.filter(f => f.status === UploadingStatus.InProgress).length;
     });
 
-    const notifyRenderedUplinkCLIMessage = computed<VNode>(() => {
-        if (configStore.isDefaultBrand) return h('a', { class: 'link', href: 'https://storj.dev/dcs/api/uplink-cli', target: '_blank', rel: 'noopener noreferrer' }, 'Uplink CLI');
-        return h('span', {}, 'Uplink CLI');
+    const notifyRenderedObjectMountMessage = computed<VNode>(() => {
+        if (configStore.isDefaultBrand) return h('a', { class: 'link', href: 'https://www.storj.io/object-mount', target: '_blank', rel: 'noopener noreferrer' }, 'Object Mount');
+        return h('span', {}, 'Object Mount');
     });
 
     function setCursor(cursor: ObjectBrowserCursor): void {
@@ -681,8 +681,8 @@ export const useObjectBrowserStore = defineStore('objectBrowser', () => {
 
             notifyError(() => {
                 return [
-                    h('span', {}, `${key}: To upload files above 30GB, please use the `),
-                    notifyRenderedUplinkCLIMessage.value,
+                    h('span', {}, `${key}: To upload files above 30GB, please use `),
+                    notifyRenderedObjectMountMessage.value,
                 ];
             }, AnalyticsErrorEventSource.OBJECT_UPLOAD_ERROR);
 
@@ -771,7 +771,7 @@ export const useObjectBrowserStore = defineStore('objectBrowser', () => {
             notifyWarning(() => {
                 return [
                     h('span', {}, `To upload large files, please consider using the `),
-                    notifyRenderedUplinkCLIMessage.value,
+                    notifyRenderedObjectMountMessage.value,
                 ];
             }, undefined, 10000);
         }

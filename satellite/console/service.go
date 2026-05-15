@@ -5617,37 +5617,39 @@ func (s *Service) GenCreateAPIKey(ctx context.Context, requestInfo CreateAPIKeyR
 		}
 	}
 
-	info, rawKey, httpErr := s.genCreateAPIKey(ctx, isMember.project, requestInfo.Name, user.UserAgent, user.ID)
-	if httpErr.Err != nil {
-		return nil, httpErr
+	if isMember.project.PassphraseEnc != nil {
+		return nil, api.HTTPError{
+			Status: http.StatusForbidden,
+			Err:    ErrForbidden.New("API keys cannot be created for projects with managed encryption"),
+		}
+	}
+
+	info, key, err := s.createAPIKey(ctx, isMember.project, requestInfo.Name, user.UserAgent, user.ID)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if ErrConflict.Has(err) {
+			status = http.StatusConflict
+		}
+		return nil, api.HTTPError{Status: status, Err: err}
 	}
 
 	// in case the project ID from the request is the public ID, replace projectID with reqProjectID
 	info.ProjectID = reqProjectID
 
 	return &CreateAPIKeyResponse{
-		Key:     rawKey,
+		Key:     key.Serialize(),
 		KeyInfo: info,
 	}, api.HTTPError{}
 }
 
-func (s *Service) genCreateAPIKey(ctx context.Context, project *Project, name string, userAgent []byte, createdBy uuid.UUID) (_ *APIKeyInfo, rawKey string, httpErr api.HTTPError) {
-	var err error
+// createAPIKey creates a macaroon API key for the project.
+// It does not check managed-encryption restrictions, leaving it to callers.
+func (s *Service) createAPIKey(ctx context.Context, project *Project, name string, userAgent []byte, createdBy uuid.UUID) (_ *APIKeyInfo, _ *macaroon.APIKey, err error) {
 	defer mon.Task()(&ctx)(&err)
-
-	if project.PassphraseEnc != nil {
-		return nil, "", api.HTTPError{
-			Status: http.StatusForbidden,
-			Err:    ErrForbidden.New("API keys cannot be created for projects with managed encryption"),
-		}
-	}
 
 	_, err = s.store.APIKeys().GetByNameAndProjectID(ctx, name, project.ID)
 	if err == nil {
-		return nil, "", api.HTTPError{
-			Status: http.StatusConflict,
-			Err:    ErrValidation.New(apiKeyWithNameExistsErrMsg),
-		}
+		return nil, nil, ErrConflict.New(apiKeyWithNameExistsErrMsg)
 	}
 
 	apiKeyVersion := macaroon.APIKeyVersionMin
@@ -5661,18 +5663,11 @@ func (s *Service) genCreateAPIKey(ctx context.Context, project *Project, name st
 
 	secret, err := macaroon.NewSecret()
 	if err != nil {
-		return nil, "", api.HTTPError{
-			Status: http.StatusInternalServerError,
-			Err:    Error.Wrap(err),
-		}
+		return nil, nil, Error.Wrap(err)
 	}
-
 	key, err := macaroon.NewAPIKey(secret)
 	if err != nil {
-		return nil, "", api.HTTPError{
-			Status: http.StatusInternalServerError,
-			Err:    Error.Wrap(err),
-		}
+		return nil, nil, Error.Wrap(err)
 	}
 
 	info, err := s.store.APIKeys().Create(ctx, key.Head(), APIKeyInfo{
@@ -5684,13 +5679,10 @@ func (s *Service) genCreateAPIKey(ctx context.Context, project *Project, name st
 		CreatedBy: createdBy,
 	})
 	if err != nil {
-		return nil, "", api.HTTPError{
-			Status: http.StatusInternalServerError,
-			Err:    Error.Wrap(err),
-		}
+		return nil, nil, Error.Wrap(err)
 	}
 
-	return info, key.Serialize(), api.HTTPError{}
+	return info, key, nil
 }
 
 // GenDeleteAPIKey deletes api key for generated api.

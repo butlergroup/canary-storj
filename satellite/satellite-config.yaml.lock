@@ -319,6 +319,12 @@ compensation.withheld-percents: 75,75,75,50,50,50,25,25,25,0,0,0,0,0,0
 # whether the abbreviated delete project flow is enabled
 # console.abbreviated-delete-project-enabled: false
 
+# whether the access creation HTTP API is enabled.
+# console.access-creation-http-api-enabled: false
+
+# whether the UI should use the access creation HTTP API instead of wasm for satellite managed encryption projects.
+# console.access-creation-via-api-enabled: false
+
 # url link for account activation redirect
 # console.account-activation-redirect-url: ""
 
@@ -406,6 +412,9 @@ compensation.withheld-percents: 75,75,75,50,50,50,25,25,25,0,0,0,0,0,0
 
 # The maximum body size allowed to be received by the API
 # console.body-size-limit: 100.00 KB
+
+# whether the bucket creation HTTP API is enabled
+# console.bucket-creation-http-api-enabled: false
 
 # whether bucket eventing UI should be shown, regardless of whether the feature is enabled
 # console.bucket-eventing-ui-enabled: true
@@ -1260,6 +1269,9 @@ identity.key-path: /root/.local/share/storj/identity/satellite/identity.key
 # enable the use of the bucket tagging endpoints
 # metainfo.bucket-tagging-enabled: false
 
+# allow object and segment checksums to be set
+# metainfo.checksums-enabled: false
+
 # the maximum number of segments that can be copied or moved in a single operation
 # metainfo.copy-move-segment-limit: 10000
 
@@ -1373,6 +1385,9 @@ identity.key-path: /root/.local/share/storj/identity/satellite/identity.key
 
 # request rate per project per second.
 # metainfo.rate-limiter.rate: 100
+
+# how often to bump the generation in the node retry tracker
+# metainfo.retry-tracker-tick-duration: 5s
 
 # redundancy scheme configuration in the format k/m/o/n-sharesize
 # metainfo.rs: 29/35/80/110-256 B

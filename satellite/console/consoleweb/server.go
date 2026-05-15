@@ -322,11 +322,14 @@ func NewServer(logger *zap.Logger, config Config, service *console.Service, cons
 		consoleapi.NewProjectManagement(logger, mon, server.service, router, &apiAuth{&server})
 		consoleapi.NewAPIKeyManagement(logger, mon, server.service, router, &apiAuth{&server})
 		consoleapi.NewBucketManagement(logger, mon, server.service, router, &apiAuth{&server})
+		consoleapi.NewAccessGrantManagement(logger, mon, server.service, router, &apiAuth{&server})
 		consoleapi.NewUserManagement(logger, mon, server.service, router, &apiAuth{&server})
 	}
 
 	if server.config.UseGeneratedPrivateAPI {
 		privateapi.NewAuthManagement(logger, mon, server.consoleService.Users(), router, &apiCORS{&server}, &apiAuth{&server})
+		privateapi.NewAccessGrantManagement(logger, mon, server.service, router, &apiCORS{&server}, &apiAuth{&server})
+		privateapi.NewBucketManagement(logger, mon, server.service, router, &apiCORS{&server}, &apiAuth{&server})
 	}
 
 	router.Handle("/api/v0/config", server.withCORS(http.HandlerFunc(server.frontendConfigHandler)))
@@ -1274,6 +1277,7 @@ func (server *Server) frontendConfigHandler(w http.ResponseWriter, r *http.Reque
 		MaxNameCharacters:                 server.config.MaxNameCharacters,
 		BillingInformationTabEnabled:      server.config.BillingInformationTabEnabled,
 		SatelliteManagedEncryptionEnabled: server.config.SatelliteManagedEncryptionEnabled,
+		AccessCreationViaAPIEnabled:       server.config.AccessCreationViaAPIEnabled && server.config.AccessCreationHttpApiEnabled && server.config.UseGeneratedPrivateAPI,
 		HideProjectEncryptionOptions:      server.config.HideProjectEncryptionOptions && server.config.SatelliteManagedEncryptionEnabled,
 		EmailChangeFlowEnabled:            server.config.EmailChangeFlowEnabled,
 		SelfServeAccountDeleteEnabled:     server.config.SelfServeAccountDeleteEnabled,

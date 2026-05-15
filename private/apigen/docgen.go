@@ -79,11 +79,15 @@ func (api *API) generateDocumentation() string {
 
 			if len(endpoint.QueryParams) > 0 {
 				wf("**Query Params:**\n\n")
-				wf("| name | type | elaboration |\n")
-				wf("|---|---|---|\n")
+				wf("| name | type | required | elaboration |\n")
+				wf("|---|---|---|---|\n")
 				for _, param := range endpoint.QueryParams {
 					typeStr, elaboration := getDocType(param.Type)
-					wf("| `%s` | `%s` | %s |\n", param.Name, typeStr, elaboration)
+					required := "yes"
+					if param.Default != nil || param.DynamicDefault != nil {
+						required = "no"
+					}
+					wf("| `%s` | `%s` | %s | %s |\n", param.Name, typeStr, required, elaboration)
 				}
 				wf("\n")
 			}
@@ -107,6 +111,8 @@ func (api *API) generateDocumentation() string {
 			if responseType != nil {
 				wf("**Response body:**\n\n")
 				wf("```typescript\n%s\n```\n\n", getTypeNameRecursively(responseType, 0))
+			} else if endpoint.ResponseType != "" {
+				wf("**Response type:** `%s`\n\n%s\n\n", endpoint.ResponseType, endpoint.ResponseDocumentation)
 			}
 		}
 	}

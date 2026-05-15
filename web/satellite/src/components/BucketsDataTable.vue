@@ -186,7 +186,7 @@
                             <component :is="ArrowRight" :size="18" />
                         </template>
                         <v-list-item-title
-                            class="ml-3 text-body-2 font-weight-medium"
+                            class="ml-3 text-body-medium font-weight-medium"
                         >
                             Open Bucket
                         </v-list-item-title>
@@ -280,7 +280,7 @@
                         </v-list-item-title>
                     </v-list-item>
                     <v-divider class="my-1" />
-                    <v-list-item class="text-error text-body-2" link @click="() => showDeleteBucketDialog(item)">
+                    <v-list-item class="text-error text-body-medium" link @click="() => showDeleteBucketDialog(item)">
                         <template #prepend>
                             <component :is="Trash2" :size="18" />
                         </template>
@@ -307,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, FunctionalComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { type FunctionalComponent, computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch  } from 'vue';
 import { useRouter } from 'vue-router';
 import {
     VBtn,
@@ -350,15 +350,15 @@ import {
 } from 'lucide-vue-next';
 
 import { Memory, Size } from '@/utils/bytesSize';
-import { Bucket, BucketCursor, BucketMetadata, BucketPage, PlacementDetails } from '@/types/buckets';
+import { type BucketCursor, type BucketPage, type PlacementDetails, Bucket, BucketMetadata  } from '@/types/buckets';
 import { useBucketsStore } from '@/store/modules/bucketsStore';
 import { useConfigStore } from '@/store/modules/configStore';
 import { useNotify } from '@/composables/useNotify';
 import { AnalyticsErrorEventSource } from '@/utils/constants/analyticsEventNames';
 import { useProjectsStore } from '@/store/modules/projectsStore';
 import { DEFAULT_PAGE_LIMIT } from '@/types/pagination';
-import { DataTableHeader, MAX_SEARCH_VALUE_LENGTH, tableSizeOptions } from '@/types/common';
-import { EdgeCredentials } from '@/types/accessGrants';
+import { type DataTableHeader, MAX_SEARCH_VALUE_LENGTH, tableSizeOptions  } from '@/types/common';
+import type { EdgeCredentials } from '@/types/accessGrants';
 import { ROUTES } from '@/router';
 import { usePreCheck } from '@/composables/usePreCheck';
 import { Versioning } from '@/types/versioning';
